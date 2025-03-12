@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "SurveyBasket": {
+      "commandName": "Project",
+      "launchBrowser": false,
+      "launchUrl": "swagger/index.html",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:7147;http://localhost:57230"
+    }
+  }, 
+}
