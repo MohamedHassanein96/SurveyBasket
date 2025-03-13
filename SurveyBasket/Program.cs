@@ -29,7 +29,7 @@ namespace SurveyBasket
 
 
             app.MapControllers();
-
+            app.UseExceptionHandler();
             app.Run();
         }
     }

@@ -1,4 +1,4 @@
-﻿namespace SurveyBasket.Entities.Erorrs
+﻿namespace SurveyBasket.Erorrs
 {
     public class UserErrors
     {

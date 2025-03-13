@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using SurveyBasket.Erorrs;
 
 namespace Survey_Basket
 {
@@ -36,6 +37,11 @@ namespace Survey_Basket
 
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IPollService, PollService>();
+
+            services.AddExceptionHandler<GlobalExceptionHandler>();
+            services.AddProblemDetails();
+
+
             services.AddFluentVlidationConfig();
             return services;
         }

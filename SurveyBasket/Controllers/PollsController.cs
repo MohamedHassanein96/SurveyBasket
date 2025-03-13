@@ -1,18 +1,13 @@
-﻿
-using Microsoft.AspNetCore.Authorization;
-
-
-
-namespace Survey_Basket.Controllers
+﻿namespace Survey_Basket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     [Authorize]
-
     public class PollsController(IPollService pollService) : ControllerBase
     {
         private readonly IPollService _pollService = pollService;
 
+        
 
         [HttpGet("")]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
@@ -26,17 +21,21 @@ namespace Survey_Basket.Controllers
         public async Task<IActionResult> Get([FromRoute]int id ,CancellationToken cancellationToken)
         {
            var result = await _pollService.GetAsync(id, cancellationToken);
-            return result.IsSuccess ? Ok(result.Value) : Problem(statusCode: StatusCodes.Status404NotFound,title: result.Error.Code,detail:result.Error.Description);
+            return result.IsSuccess 
+                ? Ok(result.Value) 
+                : result.ToProblem(statusCode: StatusCodes.Status404NotFound);
           
         }
-
+      
         [HttpPost("")]
         public async Task<IActionResult> Add([FromBody] PollRequest request,
         CancellationToken cancellationToken)
         {
-            var newPoll = await _pollService.AddAsync(request, cancellationToken);
+            var result = await _pollService.AddAsync(request, cancellationToken);
 
-            return CreatedAtAction(nameof(Get), new { id = newPoll.Id }, newPoll);
+            return result.IsSuccess 
+                ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) 
+                : result.ToProblem(statusCode: StatusCodes.Status409Conflict);
         }
 
 
@@ -44,7 +43,15 @@ namespace Survey_Basket.Controllers
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] PollRequest request, CancellationToken cancellationToken)
         {
             var result = await _pollService.UpdateAsync(id, request, cancellationToken);
-            return result.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
+            if (result.IsSuccess)
+                return NoContent();
+
+            else if (result.IsFailure && result.Error.Code== "Poll.DuplicatedTitle")
+            return result.ToProblem(statusCode: StatusCodes.Status409Conflict); 
+
+            else
+             return result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+ 
         }
 
 
@@ -54,8 +61,9 @@ namespace Survey_Basket.Controllers
         {
             var result = await _pollService.DeleteAsync(id, cancellationToken);
 
-            return result.IsSuccess ? NoContent():Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
-         
+            return result.IsSuccess 
+                ? NoContent()
+                :result.ToProblem(statusCode: StatusCodes.Status404NotFound);
         }
 
 
@@ -63,8 +71,9 @@ namespace Survey_Basket.Controllers
         public async Task<IActionResult> TogglePublish([FromRoute] int id, CancellationToken cancellationToken)
         {
             var result = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
-            return result.IsSuccess ? NoContent() : Problem(statusCode: StatusCodes.Status404NotFound, title: result.Error.Code, detail: result.Error.Description);
-           
+            return result.IsSuccess 
+                ? NoContent() 
+                : result.ToProblem(statusCode: StatusCodes.Status404NotFound);
         }
     }
 }
