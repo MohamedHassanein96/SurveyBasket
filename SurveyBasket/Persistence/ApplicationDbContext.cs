@@ -1,15 +1,31 @@
 ﻿
 
+using SurveyBasket.Entities;
+
 namespace Survey_Basket.Persistence
 {
     public class ApplicationDbContext (DbContextOptions<ApplicationDbContext> options , IHttpContextAccessor httpContextAccessor) : IdentityDbContext<ApplicationUser> (options)
     {
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
-        public DbSet<Poll> polls { get; set; }
+        public DbSet<Poll> Polls { get; set; }
+        public DbSet<Question> Questions { get; set; }
+        public DbSet<Answer> Answers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            var cascadeFKs =modelBuilder.Model
+                .GetEntityTypes()
+                .SelectMany(t=>t.GetForeignKeys())
+                .Where(fk=>fk.DeleteBehavior==DeleteBehavior.Cascade && !fk.IsOwnership);
+
+            foreach (var fk in cascadeFKs)
+            {
+                fk.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+
+
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
         }
         public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

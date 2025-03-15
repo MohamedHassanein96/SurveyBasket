@@ -1,9 +1,4 @@
-﻿
-
-
-using SurveyBasket.Erorrs;
-
-namespace Survey_Basket.Services
+﻿namespace Survey_Basket.Services
 
 {
     public class AuthService(UserManager<ApplicationUser> userManager , IJwtProvider jwtProvider) : IAuthService

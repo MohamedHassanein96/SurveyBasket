@@ -29,3 +29,6 @@ global using MapsterMapper;
 global using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 global using Microsoft.AspNetCore.Authorization;
 global using SurveyBasket.Abstractions;
+global using SurveyBasket.Contracts.Question;
+global using SurveyBasket.Contracts.QuestionResponse;
+global using SurveyBasket.Contracts.Answer;
