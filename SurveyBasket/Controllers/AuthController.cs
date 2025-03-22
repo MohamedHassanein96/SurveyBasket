@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using SurveyBasket;
-using SurveyBasket.Abstractions;
+﻿using SurveyBasket.Services.AuthService;
 
 namespace Survey_Basket.Controllers
 {
@@ -18,7 +16,7 @@ namespace Survey_Basket.Controllers
             var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
             return authResult.IsSuccess
                 ? Ok(authResult.Value)
-                : authResult.ToProblem(StatusCodes.Status400BadRequest);
+                : authResult.ToProblem();
         }
 
         [HttpPost("refresh")]
@@ -27,7 +25,7 @@ namespace Survey_Basket.Controllers
             var authResult = await _authService.GetRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
             return authResult.IsSuccess
             ? Ok(authResult.Value)
-            : authResult.ToProblem(StatusCodes.Status400BadRequest);
+            : authResult.ToProblem();
         }
 
 
@@ -35,7 +33,7 @@ namespace Survey_Basket.Controllers
         public async Task<IActionResult> RevokeRefreshTokenAsync([FromBody] RefreshTokenRequest request, CancellationToken cancellationToken)
         {
             var result = await _authService.RevokeRefreshTokenAsync(request.Token, request.RefreshToken, cancellationToken);
-            return result.IsSuccess ? Ok() : result.ToProblem(statusCode: StatusCodes.Status400BadRequest);
+            return result.IsSuccess ? Ok() : result.ToProblem();
         }
        
 

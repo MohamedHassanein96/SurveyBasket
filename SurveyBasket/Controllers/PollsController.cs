@@ -1,4 +1,6 @@
-﻿namespace Survey_Basket.Controllers
+﻿using SurveyBasket.Services.PollService;
+
+namespace Survey_Basket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -23,7 +25,7 @@
            var result = await _pollService.GetAsync(id, cancellationToken);
             return result.IsSuccess 
                 ? Ok(result.Value) 
-                : result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+                : result.ToProblem();
           
         }
       
@@ -35,7 +37,7 @@
 
             return result.IsSuccess 
                 ? CreatedAtAction(nameof(Get), new { id = result.Value.Id }, result.Value) 
-                : result.ToProblem(statusCode: StatusCodes.Status409Conflict);
+                : result.ToProblem();
         }
 
 
@@ -47,10 +49,10 @@
                 return NoContent();
 
             else if (result.IsFailure && result.Error.Code== "Poll.DuplicatedTitle")
-            return result.ToProblem(statusCode: StatusCodes.Status409Conflict); 
+            return result.ToProblem(); 
 
             else
-             return result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+             return result.ToProblem();
  
         }
 
@@ -63,7 +65,7 @@
 
             return result.IsSuccess 
                 ? NoContent()
-                :result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+                :result.ToProblem();
         }
 
 
@@ -73,7 +75,7 @@
             var result = await _pollService.TogglePublishStatusAsync(id, cancellationToken);
             return result.IsSuccess 
                 ? NoContent() 
-                : result.ToProblem(statusCode: StatusCodes.Status404NotFound);
+                : result.ToProblem();
         }
     }
 }

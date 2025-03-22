@@ -1,4 +1,4 @@
-﻿namespace Survey_Basket.Services
+﻿namespace SurveyBasket.Services.PollService
 {
     public class PollService(ApplicationDbContext context) : IPollService
     {

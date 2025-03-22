@@ -1,4 +1,4 @@
-﻿namespace Survey_Basket.Services
+﻿namespace SurveyBasket.Services.AuthService
 
 {
     public class AuthService(UserManager<ApplicationUser> userManager , IJwtProvider jwtProvider) : IAuthService

@@ -1,5 +1,4 @@
-﻿
-namespace Survey_Basket_Test.Services
+﻿namespace SurveyBasket.Services.AuthService
 {
     public interface IAuthService
     {

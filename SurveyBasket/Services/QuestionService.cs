@@ -1,8 +1,4 @@
-﻿
-using SurveyBasket.Entities;
-using SurveyBasket.Erorrs;
-
-namespace SurveyBasket.Services
+﻿namespace SurveyBasket.Services
 {
     public class QuestionService(ApplicationDbContext context) : IQuestionService
     {
@@ -63,7 +59,7 @@ namespace SurveyBasket.Services
             await _context.AddAsync(question, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
 
-           return Result.Success<QuestionResponse>(question.Adapt<QuestionResponse>());
+           return Result.Success(question.Adapt<QuestionResponse>());
         }
 
         public async Task<Result> ToggleStatusAsync(int pollId, int id, CancellationToken cancellationToken = default)

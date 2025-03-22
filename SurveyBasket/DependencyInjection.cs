@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SurveyBasket.Erorrs;
 using SurveyBasket.Services;
+using SurveyBasket.Services.AuthService;
+using SurveyBasket.Services.PollService;
 
 namespace Survey_Basket
 {
