@@ -32,4 +32,9 @@ global using SurveyBasket.Contracts.QuestionResponse;
 global using SurveyBasket.Contracts.Answer;
 global using SurveyBasket.Entities;
 global using SurveyBasket.Services;
+global using SurveyBasket.Services.PollService;
+global using SurveyBasket.Extensions;
+global using SurveyBasket.Contracts.Vote;
+
+
 

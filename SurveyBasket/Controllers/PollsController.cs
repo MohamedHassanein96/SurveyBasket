@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Services.PollService;
-
-namespace Survey_Basket.Controllers
+﻿namespace Survey_Basket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -17,6 +15,12 @@ namespace Survey_Basket.Controllers
             var polls =await _pollService.GetAllAsync(cancellationToken);
             var response = polls.Adapt<IEnumerable<PollResponse>>();
             return Ok(response);
+        }
+
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrent(CancellationToken cancellationToken)
+        {
+            return Ok(await _pollService.GetAllAvailableAsync(cancellationToken));
         }
 
         [HttpGet("{id}")]
@@ -57,7 +61,6 @@ namespace Survey_Basket.Controllers
         }
 
 
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id, CancellationToken cancellationToken)
         {
@@ -77,5 +80,6 @@ namespace Survey_Basket.Controllers
                 ? NoContent() 
                 : result.ToProblem();
         }
+      
     }
 }

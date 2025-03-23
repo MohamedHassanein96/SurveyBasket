@@ -11,6 +11,8 @@ namespace Survey_Basket.Persistence
         public DbSet<Poll> Polls { get; set; }
         public DbSet<Question> Questions { get; set; }
         public DbSet<Answer> Answers { get; set; }
+        public DbSet<Vote> Votes { get; set; }
+        public DbSet<VoteAnswer> VoteAnswers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -34,10 +36,10 @@ namespace Survey_Basket.Persistence
             var entries = ChangeTracker.Entries<AuditableEntity>();
             foreach (var entityEntry in entries)
             {
-                var currentUserId = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var currentUserId = _httpContextAccessor.HttpContext?.User.GetUserId();
                 if (entityEntry.State == EntityState.Added)
                 {
-                    entityEntry.Property(x => x.CreatedById).CurrentValue = currentUserId;
+                    entityEntry.Property(x => x.CreatedById).CurrentValue = currentUserId!;
                 }
                 else if (entityEntry.State == EntityState.Modified)
                 {

@@ -1,9 +1,9 @@
 ﻿
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using SurveyBasket.Erorrs;
-using SurveyBasket.Services;
 using SurveyBasket.Services.AuthService;
 using SurveyBasket.Services.PollService;
+using SurveyBasket.Services.Vote;
 
 namespace Survey_Basket
 {
@@ -41,6 +41,8 @@ namespace Survey_Basket
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IPollService, PollService>();
             services.AddScoped<IQuestionService, QuestionService>();
+            services.AddScoped<IVoteService, VoteService>();
+            services.AddScoped<IResultService, ResultService>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();

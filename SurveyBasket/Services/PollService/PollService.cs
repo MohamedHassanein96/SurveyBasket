@@ -4,9 +4,11 @@
     {
         private readonly ApplicationDbContext _context = context;
 
-        public async Task<IEnumerable<Poll>> GetAllAsync(CancellationToken cancellationToken = default) => await _context.Polls.AsNoTracking().ToListAsync(cancellationToken);
+        public async Task<IEnumerable<PollResponse>> GetAllAsync(CancellationToken cancellationToken = default)
+        {
 
-
+            return await _context.Polls.AsNoTracking().ProjectToType<PollResponse>().ToListAsync(cancellationToken);
+        }
         public async Task<Result<PollResponse>> GetAsync(int id, CancellationToken cancellationToken = default)
         {
             var poll = await _context.Polls.FindAsync(id, cancellationToken);
@@ -30,8 +32,6 @@
 
             return Result.Success(poll.Adapt<PollResponse>());
         }
-
-
         public async Task<Result> UpdateAsync(int id, PollRequest request, CancellationToken cancellationToken = default)
         {
             var isExistingTitle = await _context.Polls.AnyAsync(x => x.Title == request.Title && x.Id != id ,  cancellationToken: cancellationToken);
@@ -51,8 +51,6 @@
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
-
-
         public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken)
         {
             var poll = await _context.Polls.FindAsync(id,cancellationToken);
@@ -62,9 +60,6 @@
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success(); 
         }
-
-        
-
         public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken)
         {
             var poll = await _context.Polls.FindAsync(id, cancellationToken);
@@ -74,7 +69,13 @@
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
-
-       
+        public async Task<IEnumerable<PollResponse>> GetAllAvailableAsync(CancellationToken cancellationToken = default)
+        {
+            return await _context.Polls
+                .Where(x => x.IsPublished
+                 && DateOnly.FromDateTime(DateTime.UtcNow) >= x.StartsAt
+                 && DateOnly.FromDateTime(DateTime.UtcNow) <= x.EndsAt
+                ).AsNoTracking().ProjectToType<PollResponse>().ToListAsync(cancellationToken);
+        }
     }
 }
