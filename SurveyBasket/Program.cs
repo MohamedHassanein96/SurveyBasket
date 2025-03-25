@@ -1,5 +1,6 @@
 
 
+using Serilog;
 using Survey_Basket;
 
 namespace SurveyBasket
@@ -15,6 +16,11 @@ namespace SurveyBasket
             // Add services to the container.
             builder.Services.AddDependencies(builder.Configuration);
 
+            builder.Host.UseSerilog((conext, configuration) =>
+                
+                    configuration.ReadFrom.Configuration(conext.Configuration)
+                    
+               );
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,7 +28,7 @@ namespace SurveyBasket
             {
                 app.MapOpenApi();
             }
-
+            app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
             app.UseCors();
             app.UseAuthorization();

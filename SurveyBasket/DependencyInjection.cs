@@ -1,11 +1,4 @@
-﻿
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using SurveyBasket.Erorrs;
-using SurveyBasket.Services.AuthService;
-using SurveyBasket.Services.PollService;
-using SurveyBasket.Services.Vote;
-
-namespace Survey_Basket
+﻿namespace Survey_Basket
 {
     public static class DependencyInjection
     {
@@ -18,6 +11,7 @@ namespace Survey_Basket
             .UseSqlServer(conncetionString));
 
             services.AddControllers();
+            services.AddHybridCache();
 
             var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
 

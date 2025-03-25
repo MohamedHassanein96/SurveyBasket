@@ -1,10 +1,14 @@
-﻿using SurveyBasket.Entities;
+﻿using Microsoft.Extensions.Caching.Hybrid;
+using System.Collections.Generic;
 
 namespace SurveyBasket.Services
 {
-    public class QuestionService(ApplicationDbContext context) : IQuestionService
+    public class QuestionService(ApplicationDbContext context,HybridCache hybridCache ,ILogger<QuestionService> logger) : IQuestionService
     {
         private readonly ApplicationDbContext _context = context;
+        private readonly HybridCache _hybridCache = hybridCache;
+        private readonly ILogger<QuestionService> _logger = logger;
+        private const string _cachePrefix = "availableQuestions";
 
         public async Task<Result<QuestionResponse>> GetAsync(int pollId, int id, CancellationToken cancellationToken = default)
         {
@@ -60,7 +64,7 @@ namespace SurveyBasket.Services
 
             await _context.AddAsync(question, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
-
+            await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
            return Result.Success(question.Adapt<QuestionResponse>());
         }
 
@@ -73,6 +77,7 @@ namespace SurveyBasket.Services
             question.IsActive = !question.IsActive;
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
 
             return Result.Success();
         }
@@ -111,6 +116,8 @@ namespace SurveyBasket.Services
             });
 
             await _context.SaveChangesAsync(cancellationToken);
+            await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
+
             return Result.Success();
 
 
@@ -119,29 +126,30 @@ namespace SurveyBasket.Services
         public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAvailableAsync(int pollId,string userId ,CancellationToken cancellationToken = default)
         {
 
-            var hasVote = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
-            if (hasVote)
-                return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicatedVote);
+            //var hasVote = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
+            //if (hasVote)
+            //    return Result.Failure<IEnumerable<QuestionResponse>>(VoteErrors.DuplicatedVote);
 
 
-            var pollIsExsits = await _context.Polls
-                 .SingleOrDefaultAsync(x => x.Id == pollId && x.IsPublished
-                 && DateOnly.FromDateTime(DateTime.UtcNow) >= x.StartsAt
-                 && DateOnly.FromDateTime(DateTime.UtcNow) <= x.EndsAt, cancellationToken);
-            if (pollIsExsits is null)
-                return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionNotFound);
+            //var pollIsExsits = await _context.Polls
+            //     .SingleOrDefaultAsync(x => x.Id == pollId && x.IsPublished
+            //     && DateOnly.FromDateTime(DateTime.UtcNow) >= x.StartsAt
+            //     && DateOnly.FromDateTime(DateTime.UtcNow) <= x.EndsAt, cancellationToken);
+            //if (pollIsExsits is null)
+            //    return Result.Failure<IEnumerable<QuestionResponse>>(QuestionErrors.QuestionNotFound);
 
-            var questions = await _context.Questions
+            var cahcheKey = $"{_cachePrefix}-{pollId}";
+
+            var questions = await _hybridCache.GetOrCreateAsync<IEnumerable<QuestionResponse>>(
+                cahcheKey, async cacheEntry => await _context.Questions
                 .Where(q => q.PollId == pollId && q.IsActive)
                 .Include(q => q.Answers)
                 .Select(q => new QuestionResponse(
                     q.Id,
                     q.Content,
-                    q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(
-                        a.Id,
-                        a.Content
-                        ))
-                )).AsNoTracking().ToListAsync(cancellationToken);
+                    q.Answers.Where(a => a.IsActive).Select(a => new AnswerResponse(a.Id, a.Content))
+               ))
+                .AsNoTracking().ToListAsync(cancellationToken), cancellationToken: cancellationToken);
 
             return Result.Success<IEnumerable<QuestionResponse>>(questions);
 

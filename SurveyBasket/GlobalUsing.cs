@@ -35,6 +35,11 @@ global using SurveyBasket.Services;
 global using SurveyBasket.Services.PollService;
 global using SurveyBasket.Extensions;
 global using SurveyBasket.Contracts.Vote;
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
+
+global using SurveyBasket.Services.AuthService;
+
+global using SurveyBasket.Services.Vote;
 
 
 
