@@ -1,4 +1,7 @@
-﻿namespace Survey_Basket
+﻿using Microsoft.AspNetCore.Identity.UI.Services;
+using SurveyBasket.Settings;
+
+namespace SurveyBasket
 {
     public static class DependencyInjection
     {
@@ -37,11 +40,13 @@
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IVoteService, VoteService>();
             services.AddScoped<IResultService, ResultService>();
+            services.AddScoped<IEmailSender, EmailSenderService>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
-
+            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+            services.AddHttpContextAccessor();
             services.AddFluentVlidationConfig();
             return services;
         }
@@ -66,7 +71,7 @@
             services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
             var jwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 
 
             services.AddAuthentication(options =>
@@ -88,7 +93,15 @@
                         ValidAudience = jwtSettings?.Audience
                     };
                 });
+            services.Configure<IdentityOptions>(options =>
+            {
+             
+                options.Password.RequiredLength = 8;
+                options.SignIn.RequireConfirmedEmail = true;
+                options.User.RequireUniqueEmail = true;
 
+
+            });
             return services;
         }
     }

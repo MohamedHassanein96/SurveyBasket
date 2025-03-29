@@ -1,5 +1,4 @@
-﻿using SurveyBasket.Contracts;
-using SurveyBasket.Contracts.Result;
+﻿using SurveyBasket.Contracts.Result;
 
 namespace SurveyBasket.Services
 {

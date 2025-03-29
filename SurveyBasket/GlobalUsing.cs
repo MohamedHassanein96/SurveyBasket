@@ -40,6 +40,8 @@ global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using SurveyBasket.Services.AuthService;
 
 global using SurveyBasket.Services.Vote;
+global using SurveyBasket.Authentication;
+
 
 
 
