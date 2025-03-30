@@ -1,6 +1,5 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using MimeKit;
 using SurveyBasket.Settings;
 

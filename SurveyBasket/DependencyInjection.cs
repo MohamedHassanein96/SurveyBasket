@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
-using SurveyBasket.Settings;
+﻿using SurveyBasket.Settings;
 
 namespace SurveyBasket
 {
@@ -41,9 +40,11 @@ namespace SurveyBasket
             services.AddScoped<IVoteService, VoteService>();
             services.AddScoped<IResultService, ResultService>();
             services.AddScoped<IEmailSender, EmailSenderService>();
+            services.AddScoped<INotificationService, NotificationService>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
+            services.AddBackgroundJobsConfig(configuration);
 
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddHttpContextAccessor();
@@ -55,6 +56,17 @@ namespace SurveyBasket
             var mapConfig = TypeAdapterConfig.GlobalSettings;
             mapConfig.Scan(Assembly.GetExecutingAssembly());
             services.AddSingleton<IMapper>(new Mapper(mapConfig));
+            return services;
+        }
+        private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services , IConfiguration configuration)
+        {
+            services.AddHangfire(config => config
+           .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+           .UseSimpleAssemblyNameTypeSerializer()
+           .UseRecommendedSerializerSettings()
+           .UseSqlServerStorage(configuration.GetConnectionString("HangfireConnection")));
+            services.AddHangfireServer();
+
             return services;
         }
         private static IServiceCollection AddFluentVlidationConfig(this IServiceCollection services)

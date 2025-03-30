@@ -41,6 +41,13 @@ global using SurveyBasket.Services.AuthService;
 
 global using SurveyBasket.Services.Vote;
 global using SurveyBasket.Authentication;
+global using Hangfire;
+
+global using Microsoft.AspNetCore.Identity.UI.Services;
+global using Microsoft.AspNetCore.WebUtilities;
+
+global using SurveyBasket.Helpers;
+
 
 
 

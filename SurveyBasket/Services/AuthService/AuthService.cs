@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Microsoft.AspNetCore.WebUtilities;
-using SurveyBasket.Helpers;
-using static Org.BouncyCastle.Crypto.Engines.SM2Engine;
-
-namespace SurveyBasket.Services.AuthService
+﻿namespace SurveyBasket.Services.AuthService
 
 {
     public class AuthService(UserManager<ApplicationUser> userManager
@@ -160,8 +154,6 @@ namespace SurveyBasket.Services.AuthService
 
             return Result.Success();
 
-
-
         }
         private static string GenerateRefreshToken()
         {
@@ -197,7 +189,9 @@ namespace SurveyBasket.Services.AuthService
                         { "{{action_url}}",$"{origin}/auth/emailConfirmation?userId={user.Id}&code={code}"},
                 }
            );
-            await _emailSenderService.SendEmailAsync(user.Email!, "surveyBasket : Email Confirmation", emailBody);
+            BackgroundJob.Enqueue(() => _emailSenderService.SendEmailAsync(user.Email!, "✅ Survey Basket: Email Confirmation", emailBody));
+
+            await Task.CompletedTask;
         }
     }
 }
