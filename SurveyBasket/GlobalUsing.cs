@@ -47,6 +47,8 @@ global using Microsoft.AspNetCore.Identity.UI.Services;
 global using Microsoft.AspNetCore.WebUtilities;
 
 global using SurveyBasket.Helpers;
+global using SurveyBasket.Abstractions.Consts;
+
 
 
 

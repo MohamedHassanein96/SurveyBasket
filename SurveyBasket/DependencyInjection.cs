@@ -41,6 +41,7 @@ namespace SurveyBasket
             services.AddScoped<IResultService, ResultService>();
             services.AddScoped<IEmailSender, EmailSenderService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
