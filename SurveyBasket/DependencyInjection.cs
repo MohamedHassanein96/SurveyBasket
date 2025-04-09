@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Settings;
+﻿using SurveyBasket.Authentication.Filters;
+using SurveyBasket.Settings;
 
 namespace SurveyBasket
 {
@@ -84,7 +85,10 @@ namespace SurveyBasket
             services.AddOptions<JwtOptions>().BindConfiguration(JwtOptions.SectionName).ValidateDataAnnotations().ValidateOnStart();
             var jwtSettings = configuration.GetSection(JwtOptions.SectionName).Get<JwtOptions>();
 
-            services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, ApplicationRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
+
+            services.AddTransient<IAuthorizationHandler, PermissionAuthorizationHandler>();
+            services.AddTransient<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyHandler>();
 
 
             services.AddAuthentication(options =>

@@ -1,5 +1,4 @@
-﻿
-
+﻿using System.Text.Json;
 
 namespace Survey_Basket.Authentication
 {
@@ -7,7 +6,7 @@ namespace Survey_Basket.Authentication
     {
         private readonly JwtOptions _options = options.Value;
 
-        public (string token, int expireIn) GenerateToken(ApplicationUser user)
+        public (string token, int expireIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles , IEnumerable<string> permissions)
         {
             Claim[] claims = [
                 new(JwtRegisteredClaimNames.Sub,user.Id),
@@ -15,6 +14,9 @@ namespace Survey_Basket.Authentication
                 new(JwtRegisteredClaimNames.GivenName,user.FirstName),
                 new(JwtRegisteredClaimNames.FamilyName,user.LastName),
                 new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new(nameof(roles), JsonSerializer.Serialize(roles) , JsonClaimValueTypes.JsonArray),
+                new(nameof(permissions), JsonSerializer.Serialize(permissions) , JsonClaimValueTypes.JsonArray)
+                //new(nameof(roles) ,string.Join(',',roles)),
                 ]; 
 
             var symmetricsSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key!));

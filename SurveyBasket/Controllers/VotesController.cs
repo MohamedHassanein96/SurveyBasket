@@ -1,10 +1,8 @@
-﻿using SurveyBasket.Services.Vote;
-
-namespace SurveyBasket.Controllers
+﻿namespace SurveyBasket.Controllers
 {
     [Route("api/polls/{pollId}/vote")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles = DefaultRoles.Member)]
     public class VotesController(IQuestionService questionService , IVoteService voteSerice) : ControllerBase
     {
         private readonly IQuestionService _questionService = questionService;
