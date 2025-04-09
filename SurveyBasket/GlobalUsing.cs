@@ -50,6 +50,8 @@ global using SurveyBasket.Helpers;
 global using SurveyBasket.Abstractions.Consts;
 global using SurveyBasket.Contracts.Authentication;
 global using System.Data;
+global using SurveyBasket.Contracts.Roles;
+
 
 
 
