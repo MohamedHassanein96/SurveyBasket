@@ -23,8 +23,15 @@
             if (await _userManager.FindByEmailAsync(email) is not { } user)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
+            if(user.IsDisabled)
+                return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-            var result = await _signInManager.PasswordSignInAsync(user, password, false, false);
+
+            if (user.IsDisabled)
+             return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+            
+
+            var result = await _signInManager.PasswordSignInAsync(user, password, false, lockoutOnFailure: true);
             if (result.Succeeded)
             {
                 var (userRoles, userPermissions) = await GetUserRolesAndPermissions(user, cancellationToken);
@@ -46,7 +53,9 @@
                 return Result.Success(response);
             }
 
-            return Result.Failure<AuthResponse>(result.IsNotAllowed ? UserErrors.EmailNotConfirmed : UserErrors.InvalidCredentials);
+            var error = result.IsNotAllowed ? UserErrors.EmailNotConfirmed : result.IsLockedOut ? UserErrors.LockedUser : UserErrors.InvalidCredentials;
+
+            return Result.Failure<AuthResponse>(error);
         }
         public async Task<Result> SendResetPasswordCodeAsync(string email)
         {
@@ -98,6 +107,12 @@
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidJwtToken);
+
+            if (user.IsDisabled)
+                return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
+            if (user.LockoutEnd > DateTime.UtcNow) 
+                return Result.Failure<AuthResponse>(UserErrors.LockedUser);
 
             var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
             if (userRefreshToken is null)
