@@ -1,4 +1,3 @@
-using Hangfire.Dashboard;
 using HangfireBasicAuthenticationFilter;
 using Serilog;
 

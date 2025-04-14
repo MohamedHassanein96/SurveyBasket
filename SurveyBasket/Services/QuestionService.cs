@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
-using System.Collections.Generic;
+using SurveyBasket.Contracts.Common;
+using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services
 {
@@ -25,28 +26,23 @@ namespace SurveyBasket.Services
            return  Result.Success(question);
         }
 
-        public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAsync(int pollId, CancellationToken cancellationToken= default)
+        public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken= default)
         {
             var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId, cancellationToken);
 
             if (!pollIsExists)
-                return Result.Failure<IEnumerable<QuestionResponse>>(PollErrors.PollNotFound);
+                return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
-            var questions = await _context.Questions
-                .Where(x => x.PollId == pollId)
+            var query =  _context.Questions
+                .Where(x => string.IsNullOrEmpty(filters.SearchValue) || x.Content.Contains(filters.SearchValue))
+                .OrderBy(string.IsNullOrEmpty(filters.SortColumn) ? $"Id { filters.SortDirection}" : $"{filters.SortColumn} {filters.SortDirection}")
                 .Include(x => x.Answers)
-                
-                //.Select(q => new QuestionResponse
-                //(
-                //    q.Id,
-                //    q.Content,
-                //    q.Answers.Select(answer => new AnswerResponse(answer.Id, answer.Content))
-                //))
-
                 .ProjectToType<QuestionResponse>()
-                .AsNoTracking().ToListAsync(cancellationToken);
+                .AsNoTracking();
 
-            return Result.Success<IEnumerable<QuestionResponse>>(questions);
+            var questions = await PaginatedList<QuestionResponse>.CreateAsync(query, filters.PageNumber, filters.PageSize, cancellationToken);
+
+            return Result.Success(questions);
         }
 
         public async Task<Result<QuestionResponse>> AddAsync(int pollId, QuestionRequest request, CancellationToken cancellationToken = default)

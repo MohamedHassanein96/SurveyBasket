@@ -52,6 +52,7 @@ namespace SurveyBasket
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddHttpContextAccessor();
             services.AddFluentVlidationConfig();
+            services.AddHealthChecks();
             return services;
         }
         private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
