@@ -1,4 +1,5 @@
-﻿using SurveyBasket.Authentication.Filters;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using SurveyBasket.Authentication.Filters;
 
 namespace Survey_Basket.Controllers
 {
@@ -7,7 +8,7 @@ namespace Survey_Basket.Controllers
     public class PollsController(IPollService pollService) : ControllerBase
     {
         private readonly IPollService _pollService = pollService;
-
+        [EnableRateLimiting("userLimit")]
         [HttpGet("")]
         [HasPermission(Permissions.ReadPolls)]
         public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
