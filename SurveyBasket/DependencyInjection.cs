@@ -1,4 +1,5 @@
 ﻿using SurveyBasket.Authentication.Filters;
+using SurveyBasket.Health;
 using SurveyBasket.Settings;
 
 namespace SurveyBasket
@@ -52,7 +53,11 @@ namespace SurveyBasket
             services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
             services.AddHttpContextAccessor();
             services.AddFluentVlidationConfig();
-            services.AddHealthChecks();
+            services.AddHealthChecks()
+                .AddSqlServer(conncetionString, name: "database", tags: ["Sql"])
+                .AddHangfire(options => { options.MinimumAvailableServers = 1; })
+                .AddCheck<MailProviderHealthChecks>(name:"mail provider");
+                
             return services;
         }
         private static IServiceCollection AddMapsterConfig(this IServiceCollection services)

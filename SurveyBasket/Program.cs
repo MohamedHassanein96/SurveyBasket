@@ -1,4 +1,6 @@
 using HangfireBasicAuthenticationFilter;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Serilog;
 
 namespace SurveyBasket
@@ -62,6 +64,16 @@ namespace SurveyBasket
 
             app.MapControllers();
             app.UseExceptionHandler();
+            app.MapHealthChecks("health", new HealthCheckOptions
+            {
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            app.MapHealthChecks("health-check-sql", new HealthCheckOptions
+            {
+                Predicate = x => x.Tags.Contains("sql"),
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
             app.Run();
         }
     }
