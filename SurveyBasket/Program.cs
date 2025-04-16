@@ -61,14 +61,16 @@ namespace SurveyBasket
             app.UseCors();
             app.UseAuthorization();
 
-
             app.MapControllers();
+
             app.UseExceptionHandler();
+         
+            app.UseRateLimiter();
+
             app.MapHealthChecks("health", new HealthCheckOptions
             {
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
-            app.UseRateLimiter();
             app.MapHealthChecks("health-check-sql", new HealthCheckOptions
             {
                 Predicate = x => x.Tags.Contains("sql"),

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
+﻿using Asp.Versioning;
+using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.Authentication.Filters;
 using SurveyBasket.Health;
 using SurveyBasket.Settings;
@@ -58,20 +59,21 @@ namespace SurveyBasket
             services.AddHealthChecks()
                 .AddSqlServer(conncetionString, name: "database", tags: ["Sql"])
                 .AddHangfire(options => { options.MinimumAvailableServers = 1; })
-                .AddCheck<MailProviderHealthChecks>(name:"mail provider");
+                .AddCheck<MailProviderHealthChecks>(name: "mail provider");
 
-            services.AddRateLimiter(rateLimiterOptions => {
+            services.AddRateLimiter(rateLimiterOptions =>
+            {
                 rateLimiterOptions.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
 
                 rateLimiterOptions.AddPolicy("ipLimit", httpContext =>
-                
+
                     RateLimitPartition.GetFixedWindowLimiter(
                         partitionKey: httpContext.Connection.RemoteIpAddress?.ToString(),
-                        factory:_ => new FixedWindowRateLimiterOptions
+                        factory: _ => new FixedWindowRateLimiterOptions
                         {
                             PermitLimit = 2,
-                            Window =TimeSpan.FromSeconds(20),
+                            Window = TimeSpan.FromSeconds(20),
                         }
                      )
                 );
@@ -122,6 +124,23 @@ namespace SurveyBasket
                 //});
             });
 
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                //options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+                //options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
+                options.ApiVersionReader = new MediaTypeApiVersionReader("x-api-version");
+                options.ReportApiVersions = true;
+
+
+
+            }).AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'V";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
 
             return services;
         }
@@ -132,7 +151,7 @@ namespace SurveyBasket
             services.AddSingleton<IMapper>(new Mapper(mapConfig));
             return services;
         }
-        private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services , IConfiguration configuration)
+        private static IServiceCollection AddBackgroundJobsConfig(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddHangfire(config => config
            .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
@@ -184,11 +203,9 @@ namespace SurveyBasket
                 });
             services.Configure<IdentityOptions>(options =>
             {
-             
                 options.Password.RequiredLength = 8;
                 options.SignIn.RequireConfirmedEmail = true;
                 options.User.RequireUniqueEmail = true;
-
 
             });
             return services;
