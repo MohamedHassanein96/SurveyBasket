@@ -1,7 +1,9 @@
 ﻿using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.RateLimiting;
 using SurveyBasket.Authentication.Filters;
 using SurveyBasket.Health;
+using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
 using System.Threading.RateLimiting;
 
@@ -32,8 +34,7 @@ namespace SurveyBasket
 
             services.AddAuthConfig(configuration);
 
-            services.AddOpenApi();
-
+           
             services.AddMapsterConfig();
 
 
@@ -97,53 +98,44 @@ namespace SurveyBasket
                     options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
                 });
 
-                //rateLimiterOptions.AddTokenBucketLimiter("token", options =>
-                //{
-                //    options.TokenLimit = 2;
-                //    options.QueueLimit = 1;
-                //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                //    options.ReplenishmentPeriod = TimeSpan.FromSeconds(30);
-                //    options.TokensPerPeriod = (2);
-                //    options.AutoReplenishment = true;
-                //});
-                //rateLimiterOptions.AddFixedWindowLimiter("fixed", options =>
-                //{
-                //    options.PermitLimit = 2;
-                //    options.QueueLimit = 1;
-                //    options.Window = TimeSpan.FromSeconds(20);
-                //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                //});
-
-                //rateLimiterOptions.AddSlidingWindowLimiter("sliding", options =>
-                //{
-                //    options.PermitLimit = 2;
-                //    options.Window = TimeSpan.FromSeconds(20);
-                //    options.SegmentsPerWindow = 2;
-                //    options.QueueLimit = 1;
-                //    options.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                //});
             });
 
             services.AddApiVersioning(options =>
             {
-                options.DefaultApiVersion = new ApiVersion(1);
+                options.DefaultApiVersion = new ApiVersion(1.0);
                 options.AssumeDefaultVersionWhenUnspecified = true;
-                //options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
-                //options.ApiVersionReader = new QueryStringApiVersionReader("api-version");
-                options.ApiVersionReader = new MediaTypeApiVersionReader("x-api-version");
                 options.ReportApiVersions = true;
 
-
-
-            }).AddApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'V";
-                options.SubstituteApiVersionInUrl = true;
+                options.ApiVersionReader = new HeaderApiVersionReader("x-api-version");
+            })
+              .AddApiExplorer(options =>
+              {
+            options.GroupNameFormat = "'v'V";
+            options.SubstituteApiVersionInUrl = true;
             });
 
+            services
+                .AddEndpointsApiExplorer()
+                .AddOpenApiServices();
+            return services;
+        }
+        private static IServiceCollection AddOpenApiServices(this IServiceCollection services)
+        {
+            var serviceProvider = services.BuildServiceProvider();
+            var apiVersionDescriptionProvider = serviceProvider.GetRequiredService<IApiVersionDescriptionProvider>();
+
+            foreach (var description in apiVersionDescriptionProvider.ApiVersionDescriptions)
+            {
+                services.AddOpenApi(description.GroupName, options =>
+                {
+                    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+                    options.AddDocumentTransformer(new ApiVersioningTransformer(description));
+                });
+            }
 
             return services;
         }
+
         private static IServiceCollection AddMapsterConfig(this IServiceCollection services)
         {
             var mapConfig = TypeAdapterConfig.GlobalSettings;
@@ -164,7 +156,6 @@ namespace SurveyBasket
         }
         private static IServiceCollection AddFluentVlidationConfig(this IServiceCollection services)
         {
-            //Add FluentVlidation
             services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
             services.AddFluentValidationAutoValidation();
             return services;
@@ -201,6 +192,7 @@ namespace SurveyBasket
                         ValidAudience = jwtSettings?.Audience
                     };
                 });
+
             services.Configure<IdentityOptions>(options =>
             {
                 options.Password.RequiredLength = 8;

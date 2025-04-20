@@ -2,8 +2,8 @@
   "profiles": {
     "SurveyBasket": {
       "commandName": "Project",
-      "launchBrowser": false,
-      "launchUrl": "swagger/index.html",
+      "launchBrowser": true,
+      "launchUrl": "openapi/v1.Json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

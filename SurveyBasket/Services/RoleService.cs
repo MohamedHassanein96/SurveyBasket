@@ -1,5 +1,4 @@
-﻿
-namespace SurveyBasket.Services
+﻿namespace SurveyBasket.Services
 {
     public class RoleService(RoleManager<ApplicationRole> roleManager , ApplicationDbContext context) : IRoleService
     {

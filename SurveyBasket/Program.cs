@@ -1,6 +1,7 @@
 using HangfireBasicAuthenticationFilter;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Scalar.AspNetCore;
 using Serilog;
 
 namespace SurveyBasket
@@ -27,7 +28,12 @@ namespace SurveyBasket
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
+                app.MapScalarApiReference();
             }
+            //if (app.Environment.IsProduction())
+            //{
+            //    app.MapOpenApi().RequireAuthorization("ApiAdminPolicy");
+            //}
             app.UseSerilogRequestLogging();
             app.UseHttpsRedirection();
 

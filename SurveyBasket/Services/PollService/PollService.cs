@@ -42,13 +42,10 @@
 
             var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
             if (currentPoll is null)
-                return Result.Failure(PollErrors.PollNotFound); 
+                return Result.Failure(PollErrors.PollNotFound);
 
-
-            currentPoll.Title    =  request.Title;
-            currentPoll.Summary  =  request.Summary;
-            currentPoll.StartsAt =  request.StartsAt;
-            currentPoll.EndsAt   =  request.EndsAt;
+            currentPoll = request.Adapt(currentPoll);
+           
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
