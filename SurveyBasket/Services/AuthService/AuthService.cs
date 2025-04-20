@@ -1,13 +1,13 @@
 ﻿namespace SurveyBasket.Services.AuthService
 
 {
-    public class AuthService(UserManager<ApplicationUser> userManager
-        , SignInManager<ApplicationUser> signInManager
-        , IJwtProvider jwtProvider
-        , ILogger<AuthService> logger
-        ,IEmailSender emailSenderService
-        ,IHttpContextAccessor httpContextAccessor
-        ,ApplicationDbContext context) : IAuthService
+    public class AuthService(UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        IJwtProvider jwtProvider,
+        ILogger<AuthService> logger,
+        IEmailSender emailSenderService,
+        IHttpContextAccessor httpContextAccessor,
+        ApplicationDbContext context) : IAuthService
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
@@ -23,13 +23,13 @@
             if (await _userManager.FindByEmailAsync(email) is not { } user)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
-            if(user.IsDisabled)
+            if (user.IsDisabled)
                 return Result.Failure<AuthResponse>(UserErrors.InvalidCredentials);
 
 
             if (user.IsDisabled)
-             return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
-            
+                return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
+
 
             var result = await _signInManager.PasswordSignInAsync(user, password, false, lockoutOnFailure: true);
             if (result.Succeeded)
@@ -62,8 +62,8 @@
             if (await _userManager.FindByEmailAsync(email) is not { } user)
                 return Result.Success();
 
-            if(!user.EmailConfirmed)
-                return Result.Failure(UserErrors.EmailNotConfirmed);
+            if (!user.EmailConfirmed)
+                return Result.Failure(UserErrors.EmailNotConfirmed with { StatusCode = StatusCodes.Status400BadRequest });
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -85,7 +85,7 @@
                 var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(request.Code));
                 result = await _userManager.ResetPasswordAsync(user, code, request.NewPassword);
             }
-            catch(FormatException)
+            catch (FormatException)
             {
                 result = IdentityResult.Failed(_userManager.ErrorDescriber.InvalidToken());
             }
@@ -94,7 +94,7 @@
                 return Result.Success();
 
             var error = result.Errors.First();
-            return Result.Failure(new Error (error.Code , error.Description , StatusCodes.Status401Unauthorized));
+            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status401Unauthorized));
 
 
         }
@@ -111,7 +111,7 @@
             if (user.IsDisabled)
                 return Result.Failure<AuthResponse>(UserErrors.DisabledUser);
 
-            if (user.LockoutEnd > DateTime.UtcNow) 
+            if (user.LockoutEnd > DateTime.UtcNow)
                 return Result.Failure<AuthResponse>(UserErrors.LockedUser);
 
             var userRefreshToken = user.RefreshTokens.SingleOrDefault(x => x.Token == refreshToken && x.IsActive);
@@ -200,7 +200,7 @@
             var result = await _userManager.ConfirmEmailAsync(user, code);
             if (result.Succeeded)
             {
-                await _userManager.AddToRoleAsync(user, DefaultRoles.Member);
+                await _userManager.AddToRoleAsync(user, DefaultRoles.Member.Name);
                 return Result.Success();
             }
 
@@ -225,8 +225,8 @@
 
             return Result.Success();
 
-        }  
-        private async Task SendConfirmationEmail(ApplicationUser user , string code) 
+        }
+        private async Task SendConfirmationEmail(ApplicationUser user, string code)
         {
             var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
 

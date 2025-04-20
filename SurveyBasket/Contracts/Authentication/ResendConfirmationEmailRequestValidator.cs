@@ -1,6 +1,6 @@
 ﻿namespace Survey.Contracts.Authentication
 {
-    public class ResendConfirmationEmailRequestValidator:AbstractValidator<ResendConfirmationEmailRequest>
+    public class ResendConfirmationEmailRequestValidator : AbstractValidator<ResendConfirmationEmailRequest>
     {
         public ResendConfirmationEmailRequestValidator()
         {

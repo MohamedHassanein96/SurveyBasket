@@ -1,5 +1,4 @@
-﻿using MailKit;
-using MailKit.Net.Smtp;
+﻿using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using SurveyBasket.Settings;
@@ -19,11 +18,11 @@ namespace SurveyBasket.Health
                 smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls, cancellationToken);
                 smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password, cancellationToken);
 
-               return await Task.FromResult(HealthCheckResult.Healthy());
+                return await Task.FromResult(HealthCheckResult.Healthy());
             }
-            catch(Exception exception)
+            catch (Exception exception)
             {
-                return await Task.FromResult(HealthCheckResult.Unhealthy(exception:exception));
+                return await Task.FromResult(HealthCheckResult.Unhealthy(exception: exception));
             }
         }
     }

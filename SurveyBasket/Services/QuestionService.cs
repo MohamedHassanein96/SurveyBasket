@@ -1,10 +1,9 @@
 ﻿using Microsoft.Extensions.Caching.Hybrid;
-using SurveyBasket.Contracts.Common;
 using System.Linq.Dynamic.Core;
 
 namespace SurveyBasket.Services
 {
-    public class QuestionService(ApplicationDbContext context,HybridCache hybridCache ,ILogger<QuestionService> logger) : IQuestionService
+    public class QuestionService(ApplicationDbContext context, HybridCache hybridCache, ILogger<QuestionService> logger) : IQuestionService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly HybridCache _hybridCache = hybridCache;
@@ -21,21 +20,21 @@ namespace SurveyBasket.Services
                  q.Answers.Select(answer => new AnswerResponse(answer.Id, answer.Content)))).AsNoTracking().SingleOrDefaultAsync(cancellationToken);
 
             if (question is null)
-              return  Result.Failure<QuestionResponse>(QuestionErrors.QuestionNotFound);
+                return Result.Failure<QuestionResponse>(QuestionErrors.QuestionNotFound);
 
-           return  Result.Success(question);
+            return Result.Success(question);
         }
 
-        public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken= default)
+        public async Task<Result<PaginatedList<QuestionResponse>>> GetAllAsync(int pollId, RequestFilters filters, CancellationToken cancellationToken = default)
         {
             var pollIsExists = await _context.Polls.AnyAsync(x => x.Id == pollId, cancellationToken);
 
             if (!pollIsExists)
                 return Result.Failure<PaginatedList<QuestionResponse>>(PollErrors.PollNotFound);
 
-            var query =  _context.Questions
+            var query = _context.Questions
                 .Where(x => string.IsNullOrEmpty(filters.SearchValue) || x.Content.Contains(filters.SearchValue))
-                .OrderBy(string.IsNullOrEmpty(filters.SortColumn) ? $"Id { filters.SortDirection}" : $"{filters.SortColumn} {filters.SortDirection}")
+                .OrderBy(string.IsNullOrEmpty(filters.SortColumn) ? $"Id {filters.SortDirection}" : $"{filters.SortColumn} {filters.SortDirection}")
                 .Include(x => x.Answers)
                 .ProjectToType<QuestionResponse>()
                 .AsNoTracking();
@@ -61,7 +60,7 @@ namespace SurveyBasket.Services
             await _context.AddAsync(question, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);
             await _hybridCache.RemoveAsync($"{_cachePrefix}-{pollId}", cancellationToken);
-           return Result.Success(question.Adapt<QuestionResponse>());
+            return Result.Success(question.Adapt<QuestionResponse>());
         }
 
         public async Task<Result> ToggleStatusAsync(int pollId, int id, CancellationToken cancellationToken = default)
@@ -119,7 +118,7 @@ namespace SurveyBasket.Services
 
         }
 
-        public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAvailableAsync(int pollId,string userId ,CancellationToken cancellationToken = default)
+        public async Task<Result<IEnumerable<QuestionResponse>>> GetAllAvailableAsync(int pollId, string userId, CancellationToken cancellationToken = default)
         {
 
             //var hasVote = await _context.Votes.AnyAsync(v => v.PollId == pollId && v.UserId == userId, cancellationToken);
@@ -151,6 +150,6 @@ namespace SurveyBasket.Services
 
         }
 
-        
+
     }
 }

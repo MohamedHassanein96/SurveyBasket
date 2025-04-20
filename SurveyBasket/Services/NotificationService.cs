@@ -1,9 +1,9 @@
 ﻿namespace SurveyBasket.Services
 {
-    public class NotificationService(ApplicationDbContext context
-        ,UserManager<ApplicationUser> userManger
-        ,IHttpContextAccessor httpContextAccessor
-        ,IEmailSender emailSenderService) : INotificationService
+    public class NotificationService(ApplicationDbContext context,
+        UserManager<ApplicationUser> userManger,
+        IHttpContextAccessor httpContextAccessor,
+        IEmailSender emailSenderService) : INotificationService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly UserManager<ApplicationUser> _userManger = userManger;
@@ -26,7 +26,8 @@
                     AsNoTracking().ToListAsync();
             }
 
-            var users = await _userManger.Users.ToListAsync();
+            var users = await _userManger.GetUsersInRoleAsync(DefaultRoles.Member.Name);
+
             var origin = _httpContextAccessor.HttpContext?.Request.Headers.Origin;
 
             foreach (var poll in polls)

@@ -1,7 +1,7 @@
 ﻿namespace Survey_Basket.Persistence
 {
-    public class ApplicationDbContext (DbContextOptions<ApplicationDbContext> options , IHttpContextAccessor httpContextAccessor) 
-        : IdentityDbContext<ApplicationUser, ApplicationRole,string> (options)
+    public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options, IHttpContextAccessor httpContextAccessor)
+        : IdentityDbContext<ApplicationUser, ApplicationRole, string>(options)
     {
         private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
 
@@ -14,10 +14,10 @@
         {
             base.OnModelCreating(modelBuilder);
 
-            var cascadeFKs =modelBuilder.Model
+            var cascadeFKs = modelBuilder.Model
                 .GetEntityTypes()
-                .SelectMany(t=>t.GetForeignKeys())
-                .Where(fk=>fk.DeleteBehavior==DeleteBehavior.Cascade && !fk.IsOwnership);
+                .SelectMany(t => t.GetForeignKeys())
+                .Where(fk => fk.DeleteBehavior == DeleteBehavior.Cascade && !fk.IsOwnership);
 
             foreach (var fk in cascadeFKs)
             {

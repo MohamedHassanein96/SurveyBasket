@@ -24,7 +24,7 @@ namespace SurveyBasket.Controllers
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
         {
-            var result =await _userService.ChangePasswordAsync(User.GetUserId()!, request);
+            var result = await _userService.ChangePasswordAsync(User.GetUserId()!, request);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
     }

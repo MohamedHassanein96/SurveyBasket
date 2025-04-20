@@ -2,22 +2,21 @@
 
 namespace Survey_Basket.Authentication
 {
-    public class JwtProvider( IOptions<JwtOptions> options) : IJwtProvider
+    public class JwtProvider(IOptions<JwtOptions> options) : IJwtProvider
     {
         private readonly JwtOptions _options = options.Value;
 
-        public (string token, int expireIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles , IEnumerable<string> permissions)
+        public (string token, int expireIn) GenerateToken(ApplicationUser user, IEnumerable<string> roles, IEnumerable<string> permissions)
         {
             Claim[] claims = [
                 new(JwtRegisteredClaimNames.Sub,user.Id),
                 new(JwtRegisteredClaimNames.Email,user.Email!),
                 new(JwtRegisteredClaimNames.GivenName,user.FirstName),
                 new(JwtRegisteredClaimNames.FamilyName,user.LastName),
-                new(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
+                new(JwtRegisteredClaimNames.Jti,Guid.CreateVersion7().ToString()),
                 new(nameof(roles), JsonSerializer.Serialize(roles) , JsonClaimValueTypes.JsonArray),
                 new(nameof(permissions), JsonSerializer.Serialize(permissions) , JsonClaimValueTypes.JsonArray)
-                //new(nameof(roles) ,string.Join(',',roles)),
-                ]; 
+                ];
 
             var symmetricsSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key!));
             var signingCredentials = new SigningCredentials(symmetricsSecurityKey, SecurityAlgorithms.HmacSha256);
@@ -32,11 +31,11 @@ namespace Survey_Basket.Authentication
                 );
 
 
-      
+
             return (token: new JwtSecurityTokenHandler().WriteToken(token), expireIn: _options.ExpiryMinutes * 60);
         }
 
-        public  string? ValidateToken(string token)
+        public string? ValidateToken(string token)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var symmetricsSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key!));
@@ -50,7 +49,7 @@ namespace Survey_Basket.Authentication
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ClockSkew = TimeSpan.Zero
-                }, out SecurityToken validatedToken );
+                }, out SecurityToken validatedToken);
 
                 var jwtToken = (JwtSecurityToken)validatedToken;
 

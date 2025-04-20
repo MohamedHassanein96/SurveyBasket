@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-
+﻿
 namespace Survey_Basket.Persistence.EntitiesConfiguration
 {
     public class UserConfiguration : IEntityTypeConfiguration<ApplicationUser>
@@ -12,17 +11,17 @@ namespace Survey_Basket.Persistence.EntitiesConfiguration
 
             builder.HasData(new ApplicationUser
             {
-                Id = DefaultUsers.AdminID,
-                FirstName = DefaultUsers.FirstName,
-                LastName = DefaultUsers.LastName,
-                UserName = DefaultUsers.AdminEmail,
-                NormalizedUserName = DefaultUsers.AdminEmail.ToUpper(),
-                Email = DefaultUsers.AdminEmail,
-                NormalizedEmail = DefaultUsers.AdminEmail.ToUpper(),
-                SecurityStamp = DefaultUsers.AdminSecurityStamp,
-                ConcurrencyStamp = DefaultUsers.AdminConcurrencyStamp,
+                Id = DefaultUsers.Admin.ID,
+                FirstName = DefaultUsers.Admin.FirstName,
+                LastName = DefaultUsers.Admin.LastName,
+                UserName = DefaultUsers.Admin.Email,
+                NormalizedUserName = DefaultUsers.Admin.Email.ToUpper(),
+                Email = DefaultUsers.Admin.Email,
+                NormalizedEmail = DefaultUsers.Admin.Email.ToUpper(),
+                SecurityStamp = DefaultUsers.Admin.SecurityStamp,
+                ConcurrencyStamp = DefaultUsers.Admin.ConcurrencyStamp,
                 EmailConfirmed = true,
-                PasswordHash  = DefaultUsers.AdminPasswordHash
+                PasswordHash = DefaultUsers.Admin.PasswordHash
 
             });
         }

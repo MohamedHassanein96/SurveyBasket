@@ -16,8 +16,8 @@ namespace SurveyBasket.Services
             if (emailIsExists)
                 return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
-            var allowedRoles = await _roleService.GetAllAsync(cancellation:cancellationToken);
-            if (request.Roles.Except(allowedRoles.Select(x=>x.Name)).Any())
+            var allowedRoles = await _roleService.GetAllAsync(cancellation: cancellationToken);
+            if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
                 return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
 
             var user = request.Adapt<ApplicationUser>();
@@ -25,7 +25,7 @@ namespace SurveyBasket.Services
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
             {
-                await _userManager.AddToRolesAsync(user,request.Roles);
+                await _userManager.AddToRolesAsync(user, request.Roles);
                 var response = (user, request.Roles).Adapt<UserResponse>();
                 return Result.Success(response);
             }
@@ -52,7 +52,7 @@ namespace SurveyBasket.Services
                    on user.Id equals userRoles.UserId
                    join role in _context.Roles
                    on userRoles.RoleId equals role.Id into roles
-                   where !roles.Any(x => x.Name == DefaultRoles.Member)
+                   where !roles.Any(x => x.Name == DefaultRoles.Member.Name)
 
                    select new
                    {
@@ -88,7 +88,7 @@ namespace SurveyBasket.Services
             return Result.Success(user);
         }
 
-        public async Task<Result> UpdateAsync(string id ,UpdateUserRequest request, CancellationToken cancellationToken = default)
+        public async Task<Result> UpdateAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken = default)
         {
             var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email && x.Id != id, cancellationToken);
             if (emailIsExists)
@@ -98,7 +98,7 @@ namespace SurveyBasket.Services
             if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
                 return Result.Failure(UserErrors.InvalidRoles);
 
-            if (await _userManager.FindByIdAsync(id) is not { } user )
+            if (await _userManager.FindByIdAsync(id) is not { } user)
                 return Result.Failure(UserErrors.UserNotFound);
 
             user = request.Adapt(user);
@@ -111,7 +111,7 @@ namespace SurveyBasket.Services
                     .ExecuteDeleteAsync(cancellationToken);
 
                 await _userManager.AddToRolesAsync(user, request.Roles);
-              
+
                 return Result.Success();
             }
             var error = result.Errors.First();

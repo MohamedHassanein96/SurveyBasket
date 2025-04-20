@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Authentication.Filters;
-
-namespace SurveyBasket.Controllers
+﻿namespace SurveyBasket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -27,19 +25,19 @@ namespace SurveyBasket.Controllers
         public async Task<IActionResult> Add([FromBody] RoleRequest request, CancellationToken cancellationToken)
         {
             var result = await _roleService.AddAsync(request, cancellationToken);
-            return result.IsSuccess ? CreatedAtAction (nameof(Get),new { result.Value.Id } ,result.Value): result.ToProblem();
+            return result.IsSuccess ? CreatedAtAction(nameof(Get), new { result.Value.Id }, result.Value) : result.ToProblem();
         }
         [HttpPut("{id}")]
         [HasPermission(Permissions.UpdateRoles)]
-        public async Task<IActionResult> Update([FromRoute]string id ,[FromBody] RoleRequest request, CancellationToken cancellationToken)
+        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] RoleRequest request, CancellationToken cancellationToken)
         {
-            var result = await _roleService.UpdateAsync(id,request, cancellationToken);
+            var result = await _roleService.UpdateAsync(id, request, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();
         }
 
         [HttpPut("{id}/toggle-status")]
         [HasPermission(Permissions.UpdateRoles)]
-        public async Task<IActionResult> ToggleStatus([FromRoute] string id,CancellationToken cancellationToken)
+        public async Task<IActionResult> ToggleStatus([FromRoute] string id, CancellationToken cancellationToken)
         {
             var result = await _roleService.ToggleStatusAsync(id, cancellationToken);
             return result.IsSuccess ? NoContent() : result.ToProblem();

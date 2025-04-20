@@ -1,7 +1,4 @@
-﻿using Asp.Versioning;
-using Asp.Versioning.ApiExplorer;
-using Microsoft.AspNetCore.RateLimiting;
-using SurveyBasket.Authentication.Filters;
+﻿using Asp.Versioning.ApiExplorer;
 using SurveyBasket.Health;
 using SurveyBasket.OpenApiTransformers;
 using SurveyBasket.Settings;
@@ -34,7 +31,7 @@ namespace SurveyBasket
 
             services.AddAuthConfig(configuration);
 
-           
+
             services.AddMapsterConfig();
 
 
@@ -54,7 +51,15 @@ namespace SurveyBasket
             services.AddProblemDetails();
             services.AddBackgroundJobsConfig(configuration);
 
-            services.Configure<MailSettings>(configuration.GetSection(nameof(MailSettings)));
+            services.AddOptions<MailSettings>()
+                .BindConfiguration(nameof(MailSettings))
+                .ValidateDataAnnotations()
+                .ValidateOnStart();
+
+
+
+
+
             services.AddHttpContextAccessor();
             services.AddFluentVlidationConfig();
             services.AddHealthChecks()
@@ -110,9 +115,9 @@ namespace SurveyBasket
             })
               .AddApiExplorer(options =>
               {
-            options.GroupNameFormat = "'v'V";
-            options.SubstituteApiVersionInUrl = true;
-            });
+                  options.GroupNameFormat = "'v'V";
+                  options.SubstituteApiVersionInUrl = true;
+              });
 
             services
                 .AddEndpointsApiExplorer()

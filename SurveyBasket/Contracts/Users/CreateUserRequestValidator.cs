@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Contracts.Users
 {
-    public class CreateUserRequestValidator :AbstractValidator<CreateUserRequest>
+    public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
     {
         public CreateUserRequestValidator()
         {

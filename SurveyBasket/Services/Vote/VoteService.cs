@@ -25,9 +25,9 @@
 
             var vote = new Entities.Vote
             {
-               PollId = pollId,
-               UserId = userId,
-               VoteAnswers = request.Answers.Adapt<IEnumerable<VoteAnswer>>().ToList()
+                PollId = pollId,
+                UserId = userId,
+                VoteAnswers = request.Answers.Adapt<IEnumerable<VoteAnswer>>().ToList()
             };
             await _context.AddAsync(vote, cancellationToken);
             await _context.SaveChangesAsync(cancellationToken);

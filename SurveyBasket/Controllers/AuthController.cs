@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.RateLimiting;
-
-namespace Survey_Basket.Controllers
+﻿namespace Survey_Basket.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     [EnableRateLimiting("ipLimit")]
-    public class AuthController(IAuthService authService, ILogger<AuthController> logger ) : ControllerBase
+    public class AuthController(IAuthService authService, ILogger<AuthController> logger) : ControllerBase
     {
         private readonly IAuthService _authService = authService;
         private readonly ILogger<AuthController> _logger = logger;
@@ -14,7 +12,7 @@ namespace Survey_Basket.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
         {
             _logger.LogInformation("logging with email : {email} and password :{password}", request.Email, request.Password);
-               var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
+            var authResult = await _authService.GetTokenAsync(request.Email, request.Password, cancellationToken);
             return authResult.IsSuccess
                 ? Ok(authResult.Value)
                 : authResult.ToProblem();
@@ -37,7 +35,7 @@ namespace Survey_Basket.Controllers
             return result.IsSuccess ? Ok() : result.ToProblem();
         }
 
-        [HttpPost( "register")]
+        [HttpPost("register")]
         [DisableRateLimiting]
         public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
         {
@@ -46,7 +44,7 @@ namespace Survey_Basket.Controllers
             ? Ok()
             : authResult.ToProblem();
         }
-        [HttpPost( "confirm-email")]
+        [HttpPost("confirm-email")]
         public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
         {
             var authResult = await _authService.ConfirmEmailAsync(request);
@@ -54,8 +52,8 @@ namespace Survey_Basket.Controllers
             ? Ok()
             : authResult.ToProblem();
         }
-        [HttpPost( "resend-confirmation-email")]
-        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest  request)
+        [HttpPost("resend-confirmation-email")]
+        public async Task<IActionResult> ResendConfirmationEmail([FromBody] ResendConfirmationEmailRequest request)
         {
             var authResult = await _authService.ResendConfirmationEmailAsync(request);
             return authResult.IsSuccess
@@ -69,7 +67,7 @@ namespace Survey_Basket.Controllers
             return authResult.IsSuccess
             ? Ok()
             : authResult.ToProblem();
-        } 
+        }
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
         {
@@ -78,12 +76,6 @@ namespace Survey_Basket.Controllers
             ? Ok()
             : authResult.ToProblem();
         }
-        //[HttpGet("test")]
-        //[EnableRateLimiting("sliding")]
-        //public IActionResult Test()
-        //{
-        //    Thread.Sleep(6000);
-        //    return Ok();
-        //}
+
     }
 }

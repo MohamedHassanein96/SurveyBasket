@@ -3,7 +3,8 @@
     "SurveyBasket": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "openapi/v1.Json",
+      //"launchUrl": "openapi/v1.Json",
+      "launchUrl": "scalar/v1",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Authentication.Filters;
-
-namespace SurveyBasket.Controllers
+﻿namespace SurveyBasket.Controllers
 {
     [Route("api/polls/{pollId}/[controller]")]
     [ApiController]

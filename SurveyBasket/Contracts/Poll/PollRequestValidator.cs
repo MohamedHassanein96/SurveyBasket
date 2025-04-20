@@ -9,7 +9,7 @@ namespace Survey_Basket.Contracts.Poll
             RuleFor(x => x.StartsAt).NotEmpty().GreaterThanOrEqualTo(DateOnly.FromDateTime(DateTime.Today));
             RuleFor(x => x.EndsAt).NotEmpty();
             RuleFor(x => x).Must(HasValidTime).WithName(nameof(PollRequest.EndsAt)).WithMessage("{PropertyName} must be greater than or equls start date");
-            
+
         }
         public static bool HasValidTime(PollRequest request)
         {

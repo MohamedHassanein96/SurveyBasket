@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Erorrs
 {
-    public class UserErrors
+    public record UserErrors
     {
         public static readonly Error InvalidCredentials = new("User.InvalidCredentials", "Invalid Email Or Password", StatusCodes.Status401Unauthorized);
         public static readonly Error DisabledUser = new("User.DisabledUser", "Disabled User,contact your administrator", StatusCodes.Status401Unauthorized);

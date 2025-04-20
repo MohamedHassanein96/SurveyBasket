@@ -4,6 +4,6 @@
         string Name,
         IList<string> Permissions
         );
-    
-    
+
+
 }

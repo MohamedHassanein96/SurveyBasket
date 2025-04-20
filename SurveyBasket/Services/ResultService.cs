@@ -2,7 +2,7 @@
 
 namespace SurveyBasket.Services
 {
-    public class ResultService(ApplicationDbContext  context ) : IResultService
+    public class ResultService(ApplicationDbContext context) : IResultService
     {
         private readonly ApplicationDbContext _context = context;
 
@@ -55,12 +55,12 @@ namespace SurveyBasket.Services
                 return Result.Failure<IEnumerable<VotesPerQuestionResponse>>(PollErrors.PollNotFound);
 
             var votesPerQuestion = await _context.VoteAnswers
-                .Where(va=>va.Vote.PollId == pollId)
-                .Select(va=> new VotesPerQuestionResponse(
+                .Where(va => va.Vote.PollId == pollId)
+                .Select(va => new VotesPerQuestionResponse(
                     va.Question.Content,
                     va.Question.VoteAnswers
-                    .GroupBy(va=> new { AnswerId = va.Answer.Id, AnswerContent = va.Answer.Content })
-                    .Select(g=> new VotesPerAnswerResponse(
+                    .GroupBy(va => new { AnswerId = va.Answer.Id, AnswerContent = va.Answer.Content })
+                    .Select(g => new VotesPerAnswerResponse(
                         g.Key.AnswerContent,
                         g.Count()
                         ))

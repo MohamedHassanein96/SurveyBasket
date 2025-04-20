@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Services.PollService
 {
-    public class PollService(ApplicationDbContext context ,INotificationService notificationService) : IPollService
+    public class PollService(ApplicationDbContext context, INotificationService notificationService) : IPollService
     {
         private readonly ApplicationDbContext _context = context;
         private readonly INotificationService _notificationService = notificationService;
@@ -14,7 +14,7 @@
         {
             var poll = await _context.Polls.FindAsync(id, cancellationToken);
 
-            return poll is not null 
+            return poll is not null
                  ? Result.Success(poll.Adapt<PollResponse>())
                  : Result.Failure<PollResponse>(PollErrors.PollNotFound);
 
@@ -35,28 +35,28 @@
         }
         public async Task<Result> UpdateAsync(int id, PollRequest request, CancellationToken cancellationToken = default)
         {
-            var isExistingTitle = await _context.Polls.AnyAsync(x => x.Title == request.Title && x.Id != id ,  cancellationToken: cancellationToken);
+            var isExistingTitle = await _context.Polls.AnyAsync(x => x.Title == request.Title && x.Id != id, cancellationToken: cancellationToken);
 
             if (isExistingTitle)
-                return Result.Failure<PollResponse>(PollErrors.DuplicatedPollTitle); 
+                return Result.Failure<PollResponse>(PollErrors.DuplicatedPollTitle);
 
             var currentPoll = await _context.Polls.FindAsync(id, cancellationToken);
             if (currentPoll is null)
                 return Result.Failure(PollErrors.PollNotFound);
 
             currentPoll = request.Adapt(currentPoll);
-           
+
             await _context.SaveChangesAsync(cancellationToken);
             return Result.Success();
         }
         public async Task<Result> DeleteAsync(int id, CancellationToken cancellationToken)
         {
-            var poll = await _context.Polls.FindAsync(id,cancellationToken);
+            var poll = await _context.Polls.FindAsync(id, cancellationToken);
             if (poll is null)
                 return Result.Failure(PollErrors.PollNotFound);
             _context.Remove(poll);
             await _context.SaveChangesAsync(cancellationToken);
-            return Result.Success(); 
+            return Result.Success();
         }
         public async Task<Result> TogglePublishStatusAsync(int id, CancellationToken cancellationToken)
         {

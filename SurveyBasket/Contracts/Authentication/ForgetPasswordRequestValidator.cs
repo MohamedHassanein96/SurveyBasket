@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Contracts.Authentication
 {
-    public class ForgetPasswordRequestValidator :AbstractValidator<ForgetPasswordRequest>
+    public class ForgetPasswordRequestValidator : AbstractValidator<ForgetPasswordRequest>
     {
         public ForgetPasswordRequestValidator()
         {

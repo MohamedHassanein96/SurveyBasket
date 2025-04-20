@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Entities
 {
-    public class Answer :AuditableEntity
+    public class Answer : AuditableEntity
     {
 
         public int Id { get; set; }

@@ -22,7 +22,7 @@ namespace SurveyBasket.OpenApiTransformers
                     }
                 };
                 document.Components ??= new OpenApiComponents();
-                document.Components.SecuritySchemes = requirements;  
+                document.Components.SecuritySchemes = requirements;
                 // Apply it as a requirement for all operations
                 foreach (var operation in document.Paths.Values.SelectMany(path => path.Operations))
                 {

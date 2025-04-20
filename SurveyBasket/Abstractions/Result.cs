@@ -3,7 +3,7 @@
     public class Result
     {
 
-        public Result(bool isSuccess,Error error)
+        public Result(bool isSuccess, Error error)
         {
             if ((isSuccess && error != Error.None) || (!isSuccess && error == Error.None))
                 throw new InvalidOperationException();
@@ -28,7 +28,7 @@
     public class Result<TValue> : Result
     {
         private readonly TValue _value;
-        public Result(TValue? value, bool isSuccess , Error error) :base (isSuccess ,error)
+        public Result(TValue? value, bool isSuccess, Error error) : base(isSuccess, error)
         {
             _value = value;
         }

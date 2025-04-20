@@ -5,7 +5,7 @@ using SurveyBasket.Settings;
 
 namespace SurveyBasket.Services
 {
-    public class EmailSenderService(IOptions<MailSettings> mailSettings , ILogger<EmailSenderService> logger) :IEmailSender
+    public class EmailSenderService(IOptions<MailSettings> mailSettings, ILogger<EmailSenderService> logger) : IEmailSender
     {
         private readonly MailSettings _mailSettings = mailSettings.Value;
         private readonly ILogger<EmailSenderService> _logger = logger;
@@ -21,7 +21,7 @@ namespace SurveyBasket.Services
 
             var builder = new BodyBuilder
             {
-                HtmlBody =htmlMessage
+                HtmlBody = htmlMessage
             };
 
             message.Body = builder.ToMessageBody();
@@ -29,7 +29,7 @@ namespace SurveyBasket.Services
             using var smtp = new SmtpClient();
 
             _logger.LogInformation("Sending email to email {email}", email);
-            smtp.Connect(_mailSettings.Host, _mailSettings.Port ,SecureSocketOptions.StartTls);
+            smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
             smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
             await smtp.SendAsync(message);
             smtp.Disconnect(true);

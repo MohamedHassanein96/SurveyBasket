@@ -1,6 +1,4 @@
-﻿using SurveyBasket.Entities;
-
-namespace SurveyBasket.Persistence.EntitiesConfiguration
+﻿namespace SurveyBasket.Persistence.EntitiesConfiguration
 {
     public class VoteConfiguration : IEntityTypeConfiguration<Vote>
     {

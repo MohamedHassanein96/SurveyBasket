@@ -1,6 +1,6 @@
 ﻿namespace SurveyBasket.Contracts.Roles
 {
-    public class RoleRequestValidator :AbstractValidator<RoleRequest>
+    public class RoleRequestValidator : AbstractValidator<RoleRequest>
     {
         public RoleRequestValidator()
         {
@@ -18,7 +18,7 @@
                 .Must(x => x.Distinct().Count() == x.Count)
                 .WithMessage("you can not add duplicated permissions for the same role")
                 .When(x => x.Permissions != null); // pour ne pas faire une exception
-                
+
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Survey.Contracts.Authentication
 {
-    public class RegisterRequestValidator :AbstractValidator<RegisterRequest>
+    public class RegisterRequestValidator : AbstractValidator<RegisterRequest>
     {
         public RegisterRequestValidator()
         {
