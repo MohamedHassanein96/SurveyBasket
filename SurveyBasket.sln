@@ -5,6 +5,8 @@ VisualStudioVersion = 17.13.35825.156
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurveyBasket", "SurveyBasket\SurveyBasket.csproj", "{10E04F08-0E5D-4485-881A-B06CF4815544}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurveyBasket.Tests", "SurveyBasket.Tests\SurveyBasket.Tests.csproj", "{003D9C1E-F2E8-445C-A131-FBC0DF3B7B9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{10E04F08-0E5D-4485-881A-B06CF4815544}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{10E04F08-0E5D-4485-881A-B06CF4815544}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{10E04F08-0E5D-4485-881A-B06CF4815544}.Release|Any CPU.Build.0 = Release|Any CPU
+		{003D9C1E-F2E8-445C-A131-FBC0DF3B7B9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{003D9C1E-F2E8-445C-A131-FBC0DF3B7B9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{003D9C1E-F2E8-445C-A131-FBC0DF3B7B9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{003D9C1E-F2E8-445C-A131-FBC0DF3B7B9E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
