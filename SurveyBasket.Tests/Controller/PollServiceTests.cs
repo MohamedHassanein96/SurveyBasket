@@ -1,27 +1,30 @@
 ﻿using FakeItEasy;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Survey_Basket.Abstractions;
 using Survey_Basket.Contracts.Poll;
 using Survey_Basket.Entities;
 using Survey_Basket.Persistence;
-using SurveyBasket.Contracts.Roles;
+
 using SurveyBasket.Services.PollService;
-using System;
-using System.Security.Cryptography;
-using System.Threading;
+
 
 namespace SurveyBasket.Tests.Controller
 {
     public class PollServiceTests
     {
-
+        private readonly InMemoryDbContext _context;
+        private readonly PollService _pollService;
         public PollServiceTests()
         {
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
            .UseInMemoryDatabase(Guid.NewGuid().ToString())
            .Options;
 
-            using var context = new InMemoryDbContext(options,null);
+
+            var httpContextAccessor = A.Fake<IHttpContextAccessor>();
+            _context = new InMemoryDbContext(options, httpContextAccessor);
+            _pollService = new PollService(_context,null);
+          
         }
 
         [Fact]
@@ -29,13 +32,31 @@ namespace SurveyBasket.Tests.Controller
         {
             //Arrange 
 
-            var _pollService = A.Fake<IPollService>();
-           
+            var polls = new List<Poll>
+            {
+                new Poll
+                {
+                 Title = "poll1",
+                Summary = "ss",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+                },
+                new Poll
+                {
+                Title = "poll2",
+                Summary = "ss",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
 
-            A.CallTo(() => _pollService.GetAllAsync(A<CancellationToken>.Ignored))
-              .Returns(new List<PollResponse> {
-                 new PollResponse (1, "s", "sjkas", true,  DateOnly.FromDateTime(DateTime.UtcNow),  DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1))
-              });
+                }
+
+            };
+         
+          
+            _context.Polls.AddRange(polls);
+            await _context.SaveChangesAsync();
+
+
 
             //Act
             var result = await _pollService.GetAllAsync(CancellationToken.None);
@@ -48,13 +69,7 @@ namespace SurveyBasket.Tests.Controller
         public async Task GetAllAsync_WhenThereAreNoPolls_ReturnsEmptyList()
         {
             //Arrange 
-            var _pollService = A.Fake<IPollService>();
-
-
-            A.CallTo(() => _pollService.GetAllAsync(A<CancellationToken>.Ignored))
-              .Returns(new List<PollResponse>()); 
-              
-
+         
             //Act
             var result = await _pollService.GetAllAsync(CancellationToken.None);
 
@@ -67,14 +82,16 @@ namespace SurveyBasket.Tests.Controller
         public async Task GetAsync_WhenIdIsExisted_RetunsTheSpecificPoll()
         {
             //Arrange 
-            var _pollService = A.Fake<IPollService>();
-            var pollResponse = new PollResponse(
-             1, "Title", "Description", true,
-             DateOnly.FromDateTime(DateTime.UtcNow),
-             DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+            var poll = new Poll
+            {
+                Title = "poll1",
+                Summary = "existing",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+            };
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
 
-            A.CallTo(() => _pollService.GetAsync(1, A<CancellationToken>.Ignored))
-           .Returns(Task.FromResult(Result.Success(pollResponse)));
 
 
             //Act 
@@ -87,20 +104,13 @@ namespace SurveyBasket.Tests.Controller
         public async Task GetAsync_WhenIdIsNotExisted_RetunsPollNotFound()
         {
             //Arrange 
-            var _pollService = A.Fake<IPollService>();
-            var error = new Error("Poll.NotFound", "PollNotFound", 404);
-          
-
-            A.CallTo(() => _pollService.GetAsync(1, A<CancellationToken>.Ignored))
-           .Returns(Task.FromResult(Result.Failure<PollResponse>(error)));
-
+            int id = 1;
 
             //Act 
-            var result = await _pollService.GetAsync(1, CancellationToken.None);
+            var result = await _pollService.GetAsync(id, CancellationToken.None);
 
             //Assert
             Assert.True(result.IsFailure);
-           
 
         }
 
@@ -108,12 +118,22 @@ namespace SurveyBasket.Tests.Controller
         public async Task AddAsync_WhenPollTitleIsExisted_RetunsPollDuplicatedTitle()
         {
             // Arrange
-            var _pollService = A.Fake<IPollService>();
-            var request = new PollRequest("poll1", "jdksajks", DateOnly.FromDateTime(DateTime.UtcNow), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
-            var error = new Error("Poll.DuplicatedTitle", "DuplicatedTitle", 409);
+            var poll = new Poll
+            {
+                Title = "poll1",
+                Summary = "existing",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+            };
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
 
-            A.CallTo(() => _pollService.AddAsync(request, A<CancellationToken>.Ignored))
-                .Returns(Task.FromResult(Result.Failure<PollResponse>(error)));
+            var request = new PollRequest(
+                "poll1",
+                "jdksajks",
+                DateOnly.FromDateTime(DateTime.UtcNow), 
+                DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+          
 
             //Act
             var result = await _pollService.AddAsync(request, CancellationToken.None);
@@ -127,24 +147,132 @@ namespace SurveyBasket.Tests.Controller
         public async Task AddAsync_WhenPollTitleIsNotExisted_RetunsTheAddedPoll()
         {
             // Arrange
-            var _pollService = A.Fake<IPollService>();
-            var request = new PollRequest("poll1", "jdksajks", DateOnly.FromDateTime(DateTime.UtcNow), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
-            var pollResponse = new PollResponse(
-             1, "Title", "Description", true,
-             DateOnly.FromDateTime(DateTime.UtcNow),
-             DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+            var request = new PollRequest(
+                "poll1", "jdksajks",
+                DateOnly.FromDateTime(DateTime.UtcNow),
+                DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
 
-            A.CallTo(() => _pollService.AddAsync(request, A<CancellationToken>.Ignored))
-                .Returns(Task.FromResult(Result.Success(pollResponse)));
 
             //Act
             var result = await _pollService.AddAsync(request, CancellationToken.None);
 
             //Assert
-            //Assert.True(result.IsSuccess);
-            Assert.Equal(1, result.Value.Id);
+            Assert.True(result.IsSuccess);
+            Assert.Equal("poll1", result.Value.Title);
+            Assert.Single(_context.Polls);
+
+
+        }
+
+        [Fact]
+        public async Task DeleteAsync_WhenPollIdIsNotExisted_ReturnsPollNotFound()
+        {
+            //Arrange
+            int id = 1;
+            var pollInDb = await _context.Polls.FindAsync(id);
+            Assert.Null(pollInDb);
+            //Act
+            var result = await _pollService.DeleteAsync(id, CancellationToken.None);
+
+            //Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal(result.Error.Code, "Poll.NotFound");
+        }
+        [Fact]
+        public async Task DeleteAsync_WhenPollIdIsExisted_ReturnsSuccess()
+        {
+            //Arrange
+            int id = 1;
+            var poll = new Poll
+            {
+                Title = "poll1",
+                Summary = "existing",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+            };
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
+
+          
+
+            //Act
+            var result = await _pollService.DeleteAsync(id, CancellationToken.None);
+
+            //Assert
+            Assert.True(result.IsSuccess);
+
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WhenTitleAlreadyExistsForAnotherPoll_ReturnsDuplicatedPollTitleError()
+        {
+            //Arrange
+            var poll = new Poll
+            {
+                Title = "poll1",
+                Summary = "existing",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+            };
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
+
+            var pollRequest = new PollRequest("poll1", "shjhjj", DateOnly.FromDateTime(DateTime.UtcNow), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+            
          
 
+            //Act 
+            var result = await _pollService.UpdateAsync(2, pollRequest);
+
+
+            //Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal(result.Error.Code, "Poll.DuplicatedTitle");
+        }
+
+        [Fact]
+        public async Task UpdateAsync_WhenPollIdIsNotExisted_ReturnsPollNotFound()
+        {
+            //Arrange
+            var pollRequest = new PollRequest("po", "shjhjj", DateOnly.FromDateTime(DateTime.UtcNow), DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+          
+
+            //Act
+            var result = await _pollService.UpdateAsync(1, pollRequest, CancellationToken.None);
+
+            //Assert
+            Assert.True(result.IsFailure);
+            Assert.Equal(result.Error.Code, "Poll.NotFound");
+        }
+
+
+        [Fact]
+        public async Task UpdateAsync_WhenTitleDoesNotConflictAnotherPoll_ReturnsSuccess()
+        {
+            //Arrange
+            var poll = new Poll
+            {
+                Title = "poll1",
+                Summary = "existing",
+                StartsAt = DateOnly.FromDateTime(DateTime.UtcNow),
+                EndsAt = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1)
+            };
+            _context.Polls.Add(poll);
+            await _context.SaveChangesAsync();
+
+            var pollRequest = new PollRequest("poll1",
+                "shjhjj",
+                DateOnly.FromDateTime(DateTime.UtcNow),
+                DateOnly.FromDateTime(DateTime.UtcNow).AddDays(1));
+           
+
+            //Act 
+            var result = await _pollService.UpdateAsync(1, pollRequest);
+
+
+            //Assert
+            Assert.True(result.IsSuccess);
+          
         }
     }
 
