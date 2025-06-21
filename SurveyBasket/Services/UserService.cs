@@ -10,39 +10,6 @@ namespace SurveyBasket.Services
         private readonly ApplicationDbContext _context = context;
         private readonly IRoleService _roleService = roleService;
 
-        public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
-        {
-            var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
-            if (emailIsExists)
-                return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
-
-            var allowedRoles = await _roleService.GetAllAsync(cancellation: cancellationToken);
-            if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
-                return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
-
-            var user = request.Adapt<ApplicationUser>();
-
-            var result = await _userManager.CreateAsync(user, request.Password);
-            if (result.Succeeded)
-            {
-                await _userManager.AddToRolesAsync(user, request.Roles);
-                var response = (user, request.Roles).Adapt<UserResponse>();
-                return Result.Success(response);
-            }
-            var error = result.Errors.First();
-            return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
-
-        public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request)
-        {
-            var user = await _userManager.FindByIdAsync(userId);
-            var result = await _userManager.ChangePasswordAsync(user!, request.CurrentPassword, request.NewPassword);
-            if (result.Succeeded)
-                return Result.Success();
-
-            var error = result.Errors.First();
-            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
 
         public async Task<IEnumerable<UserResponse>> GetAllAsync(CancellationToken cancellationToken = default)
         {
@@ -69,7 +36,6 @@ namespace SurveyBasket.Services
                  .ToListAsync(cancellationToken);
             return users;
         }
-
         public async Task<Result<UserResponse>> GetAsync(string id, CancellationToken cancellationToken = default)
         {
             if (await _userManager.FindByIdAsync(id) is not { } user)
@@ -81,13 +47,28 @@ namespace SurveyBasket.Services
 
             return Result.Success(response);
         }
-
-        public async Task<Result<UserProfileResponse>> GetProfileAsync(string userId)
+        public async Task<Result<UserResponse>> AddAsync(CreateUserRequest request, CancellationToken cancellationToken = default)
         {
-            var user = await _userManager.Users.Where(x => x.Id == userId).ProjectToType<UserProfileResponse>().SingleAsync();
-            return Result.Success(user);
-        }
+            var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email, cancellationToken);
+            if (emailIsExists)
+                return Result.Failure<UserResponse>(UserErrors.DuplicatedEmail);
 
+            var allowedRoles = await _roleService.GetAllAsync(cancellation: cancellationToken);
+            if (request.Roles.Except(allowedRoles.Select(x => x.Name)).Any())
+                return Result.Failure<UserResponse>(UserErrors.InvalidRoles);
+
+            var user = request.Adapt<ApplicationUser>();
+
+            var result = await _userManager.CreateAsync(user, request.Password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRolesAsync(user, request.Roles);
+                var response = (user, request.Roles).Adapt<UserResponse>();
+                return Result.Success(response);
+            }
+            var error = result.Errors.First();
+            return Result.Failure<UserResponse>(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
         public async Task<Result> UpdateAsync(string id, UpdateUserRequest request, CancellationToken cancellationToken = default)
         {
             var emailIsExists = await _userManager.Users.AnyAsync(x => x.Email == request.Email && x.Id != id, cancellationToken);
@@ -116,24 +97,6 @@ namespace SurveyBasket.Services
             }
             var error = result.Errors.First();
             return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
-        }
-
-        public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request)
-        {
-            //    var user = await _userManager.FindByIdAsync(userId);
-            //    user = request.Adapt(user);
-            //    await _userManager.UpdateAsync(user!);
-
-
-            await _userManager.Users.Where(x => x.Id == userId)
-            .ExecuteUpdateAsync(setters =>
-            setters
-            .SetProperty(x => x.FirstName, request.FirstName)
-            .SetProperty(x => x.LastName, request.LastName)
-                );
-
-
-            return Result.Success();
         }
         public async Task<Result> ToggleStatus(string id)
         {
@@ -165,5 +128,48 @@ namespace SurveyBasket.Services
 
             return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
         }
+        public async Task<Result<UserProfileResponse>> GetProfileAsync(string userId)
+        {
+            var user = await _userManager.Users.Where(x => x.Id == userId).ProjectToType<UserProfileResponse>().SingleAsync();
+            return Result.Success(user);
+        }
+        public async Task<Result> UpdateProfileAsync(string userId, UpdateProfileRequest request)
+        {
+            //    var user = await _userManager.FindByIdAsync(userId);
+            //    user = request.Adapt(user);
+            //    await _userManager.UpdateAsync(user!);
+
+
+            await _userManager.Users.Where(x => x.Id == userId)
+            .ExecuteUpdateAsync(setters =>
+            setters
+            .SetProperty(x => x.FirstName, request.FirstName)
+            .SetProperty(x => x.LastName, request.LastName)
+                );
+
+
+            return Result.Success();
+        }
+        public async Task<Result> ChangePasswordAsync(string userId, ChangePasswordRequest request)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            var result = await _userManager.ChangePasswordAsync(user!, request.CurrentPassword, request.NewPassword);
+            if (result.Succeeded)
+                return Result.Success();
+
+            var error = result.Errors.First();
+            return Result.Failure(new Error(error.Code, error.Description, StatusCodes.Status400BadRequest));
+        }
+
+      
+
+      
+
+
+     
+
+        
+      
+        
     }
 }

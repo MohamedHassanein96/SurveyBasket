@@ -274,6 +274,12 @@ namespace SurveyBasket.Tests.Controller
             Assert.True(result.IsSuccess);
           
         }
+
+        [Fact]
+        public void ThisShouldThrowException()
+        {
+            throw new Exception("This is a test exception to fail the pipeline.");
+        }
     }
 
 }
