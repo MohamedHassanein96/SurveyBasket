@@ -275,11 +275,7 @@ namespace SurveyBasket.Tests.Controller
           
         }
 
-        [Fact]
-        public void ThisShouldThrowException()
-        {
-            throw new Exception("This is a test exception to fail the pipeline.");
-        }
+       
     }
 
 }
